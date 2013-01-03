@@ -1,3 +1,5 @@
+require 'bundler/setup'
+require 'dbus'
 require 'rype'
 
 def parse_body(body)

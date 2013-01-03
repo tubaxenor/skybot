@@ -11,12 +11,12 @@
 
 export DISPLAY=:1
 
-dnb=`dirname "$0"`
+#dnb=`dirname "$0"`
 
 
 start() {
-  "$dnb/start-server.sh" status
-  if [[ "$?" == '0' ]]; then
+  #". ./start-server.sh" status
+  #if [[ "$?" == '0' ]]; then
     echo "Starting x11vnc"
     if [[ `ps aux | grep skype | grep "x11vnc -display :1" | grep -v grep | wc -l` == '0' ]]; then
     x11vnc -display :1 -bg -nopw -listen localhost -xkb
@@ -26,10 +26,10 @@ start() {
     #pid=`ps aux | grep skype | grep "x11vnc -display :1" | grep -v grep | awk '{ print $2; }'`
     echo "      now use on your machine: ssh -L 5900:127.0.0.1:5900 'skype@`hostname`'"
     echo "      and connect to your local port with vncviewer!"
-  else
-    echo "The server doesn't run."
-    echo 'Use "'"$dnb"'/start-server.sh" to start the server'
-  fi
+  #else
+    #echo "The server doesn't run."
+    #echo 'Use "'"$dnb"'/start-server.sh" to start the server'
+  #fi
 
 }
 
