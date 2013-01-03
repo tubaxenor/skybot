@@ -8,15 +8,16 @@ NOTICE: This project is still under development
 * You need dbus installed (e.g., via apt on Ubuntu)
 
 and, finally
-'''
+
+```
 bundle install
-'''
+```
 
 ##Usage
 
-'''
+```
 ruby bot.rb
-'''
+```
 
 ##License
 MIT
