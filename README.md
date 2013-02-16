@@ -46,7 +46,7 @@ vncviewer localhost
 
 After login and setting, on your server :
 ```
-ruby skybot/bot.sh
+skybot start
 ```
 
 ##License
