@@ -1,7 +1,10 @@
 source 'http://rubygems.org'
-gem "rype"
+gem "rype", git: 'https://github.com/nfelger/rype.git'
 #gem 'Ruby4Skype', git: 'https://github.com/tubaxenor/ruby4skype.git'
 gem 'json'
 gem 'eventmachine'
+gem 'eventmachine_httpserver'
+gem "daemons"
 gem 'nokogiri'
 gem 'ruby-dbus', git: 'https://github.com/mvidner/ruby-dbus.git'
+gem 'thor'
