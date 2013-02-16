@@ -39,13 +39,13 @@ Rype.on(:chatmessage_received) do |chatmessage|
             puts "chat name: #{chat.chatname}"
             puts "private chat: #{is_private}"
             puts "body: #{body}"
-            if body =~ /(hi|oy|hello|morning|evening|heyo)/i
+            if body =~ /^(hi|hello|morning|evening|heyo)$/
               chat.send_message("Greetings, #{from_name}")
 	    elsif body =~ /(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i
 	      url = body.scan(/(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i).first
 	      msg = url_parse(url[0])
-	      chat.send_message("#{from_name}'s url --#{msg}--")
-	    elsif body =~ /\.u (.*)$/
+	      chat.send_message("#{from_name}'s url [ #{msg} ]")
+	    elsif body =~ /^\.u (.*)$/
 	      query = /\.u (.*)$/.match(body)[1]
 	      msg = urban_query(query)
 	      chat.send_message("\"#{msg}\"")
