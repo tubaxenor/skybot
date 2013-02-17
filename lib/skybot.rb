@@ -8,6 +8,7 @@ require 'nokogiri'
 require 'cgi'
 require 'thor'
 require 'lib/skybot/server'
+require 'lib/skybot/events'
 require "daemons"
 
 module Skybot
@@ -50,7 +51,7 @@ module Skybot
                     msg = url_parse(url[0])
                     chat.send_message("#{from_name}'s url [ #{msg} ]")
                   elsif body =~ /^\.u (.*)$/
-                    query = /\.u (.*)$/.match(body)[1]
+                    query = /\.u (.*)$/.match()[1]
                     msg = urban_query(query)
                     chat.send_message("\"#{msg}\"")
                   end
@@ -60,6 +61,7 @@ module Skybot
           end
         end
       end
+
       Rype.attach("skybot")
       threads << Rype.thread
       if chat_id != ""
@@ -94,13 +96,14 @@ module Skybot
     desc "restart", "restart skybot"
     def restart
       stop
+      sleep(3)
       start
     end
 
     desc "list", "list chatroom"
     def list
       Rype::Logger.set(Logger.new(File.join(ROOT_DIR, 'skybot.log')))
-      Rype.attach
+      Rype.attach("skybot")
       Rype.chats do |chats|
         chats.each do |chat|
           p chat.chatname

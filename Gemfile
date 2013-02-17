@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-gem "rype", git: 'https://github.com/nfelger/rype.git'
+gem "rype", git: 'https://github.com/tubaxenor/rype.git'
 #gem 'Ruby4Skype', git: 'https://github.com/tubaxenor/ruby4skype.git'
 gem 'json'
 gem 'eventmachine'
