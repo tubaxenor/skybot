@@ -22,7 +22,7 @@ module Skybot
       if File.exist?(pid_file)
         puts "skybot already running"
         exit
-      end 
+      end
       Dir.mkdir(File.join(ROOT_DIR, 'log'), 0700) unless File.directory?(File.join(ROOT_DIR, 'log'))
       threads = []
       Daemons.daemonize(
@@ -42,16 +42,17 @@ module Skybot
                   is_private = members.length == 2
                   to, text   = parse_body(body)
                   Rype::Logger.info "chat name: #{chat.chatname}"
+                  Rype::Logger.info "from: #{from_name}"
                   Rype::Logger.info "private chat: #{is_private}"
                   Rype::Logger.info "body: #{body}"
                   if body =~ /^(hi|hello|morning|evening|heyo)$/
-                    chat.send_message("Greetings, #{from_name}")
+                    chat.send_message("Greetings, #{from_name}") #if from_name == "Wei-fong Chang"
                   elsif body =~ /(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i
                     url = body.scan(/(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i).first
                     msg = url_parse(url[0])
                     chat.send_message("#{from_name}'s url [ #{msg} ]")
                   elsif body =~ /^\.u (.*)$/
-                    query = /\.u (.*)$/.match()[1]
+                    query = /\.u (.*)$/.match(body)[1]
                     msg = urban_query(query)
                     chat.send_message("\"#{msg}\"")
                   end
@@ -62,22 +63,44 @@ module Skybot
         end
       end
 
-      Rype.attach("skybot")
-      threads << Rype.thread
-      if chat_id != ""
-        threads << Thread.new do 
-          EM.run do
-            EM.start_server(
-              "127.0.0.1",
-              "9990",
-              Server,
-              chat_id
-            )
-          end
-        end
-      end
-      threads.each do |t|
-        t.join
+      Rype.attach("skybot").join
+    end
+
+    desc "server [CHAT_ID]", "start post server"
+    def server(chat_id="")
+      if chat_id == ""
+	puts "No chatroom specified."
+	exit
+      elsif chat_id == "stop"
+	puts "Stopping skybot"
+	server_pid_file = File.join('/', 'tmp', 'skybot_server.pid')
+	if File.exist?(server_pid_file)
+	  pidserver = File.read(server_pid_file).to_i
+	  Process.kill('TERM', pidserver)
+	else
+	  puts "no skybot server running"
+	end
+      else
+	Daemons.daemonize(
+	  :app_name => 'skybot_server',
+	  :dir_mode => :normal,
+	  :log_dir => File.join(ROOT_DIR, 'log'),
+	  :log_output => true,
+	  :dir => File.join('/', 'tmp')
+	)
+	Rype.attach('skybot')
+	Signal.trap('TERM') { EM.stop }
+	puts "Start server"
+	EM.run do
+	  EM.add_timer(3) do
+	    EM.start_server(
+	      "118.163.31.140",
+	      "9990",
+	      Server,
+	      chat_id, Rype
+	    )
+	  end
+	end
       end
     end
 
@@ -86,10 +109,10 @@ module Skybot
       puts "Stopping skybot"
       pid_file = File.join('/', 'tmp', 'skybot.pid')
       if File.exist?(pid_file)
-        pid = File.read(pid_file).to_i
-        Process.kill('TERM', pid)
+	pid = File.read(pid_file).to_i
+	Process.kill('TERM', pid)
       else
-        puts "no skybot running"
+	puts "no skybot running"
       end
     end
 
@@ -111,7 +134,7 @@ module Skybot
       end
     end
 
-    private      
+    private
       def parse_body(body)
         case body
         when /^! *(.*)/           ; [Config.me, $1]
