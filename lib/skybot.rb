@@ -94,7 +94,7 @@ module Skybot
 	EM.run do
 	  EM.add_timer(3) do
 	    EM.start_server(
-	      "118.163.31.140",
+	      "1.34.62.107",
 	      "9990",
 	      Server,
 	      chat_id, Rype
@@ -153,7 +153,7 @@ module Skybot
       end
 
       def url_parse(url)
-        CGI.unescape_html Nokogiri::HTML(open(url)).at("title").text.gsub(/\s+/, ' ')
+        CGI.unescape_html Nokogiri::HTML(open(url), nil, "UTF-8").at("title").text.gsub(/\s+/, ' ').force_encoding('UTF-8')
       rescue
         "no title found"
       end
