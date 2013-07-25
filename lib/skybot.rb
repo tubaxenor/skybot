@@ -10,8 +10,17 @@ require 'thor'
 require 'lib/skybot/server'
 require 'lib/skybot/events'
 require "daemons"
+require 'ostruct'
 
 module Skybot
+
+  def self.config
+    if File.exist? File.join(ROOT_DIR, 'config/config.yml')
+      to_ostruct(YAML::load_file(File.join(ROOT_DIR, 'config/config.yml')))
+    else
+      to_ostruct(YAML::load_file(File.join(ROOT_DIR, 'config/config.default.yml')))
+    end
+  end
 
   class Bot < Thor
 
@@ -23,6 +32,7 @@ module Skybot
         puts "skybot already running"
         exit
       end
+
       Dir.mkdir(File.join(ROOT_DIR, 'log'), 0700) unless File.directory?(File.join(ROOT_DIR, 'log'))
       threads = []
       Daemons.daemonize(
@@ -69,38 +79,38 @@ module Skybot
     desc "server [CHAT_ID]", "start post server"
     def server(chat_id="")
       if chat_id == ""
-	puts "No chatroom specified."
-	exit
+      	puts "No chatroom specified."
+      	exit
       elsif chat_id == "stop"
-	puts "Stopping skybot"
-	server_pid_file = File.join('/', 'tmp', 'skybot_server.pid')
-	if File.exist?(server_pid_file)
-	  pidserver = File.read(server_pid_file).to_i
-	  Process.kill('TERM', pidserver)
-	else
-	  puts "no skybot server running"
-	end
+      	puts "Stopping skybot"
+      	server_pid_file = File.join('/', 'tmp', 'skybot_server.pid')
+      	if File.exist?(server_pid_file)
+      	  pidserver = File.read(server_pid_file).to_i
+      	  Process.kill('TERM', pidserver)
+      	else
+      	  puts "no skybot server running"
+      	end
       else
-	Daemons.daemonize(
-	  :app_name => 'skybot_server',
-	  :dir_mode => :normal,
-	  :log_dir => File.join(ROOT_DIR, 'log'),
-	  :log_output => true,
-	  :dir => File.join('/', 'tmp')
-	)
-	Rype.attach('skybot')
-	Signal.trap('TERM') { EM.stop }
-	puts "Start server"
-	EM.run do
-	  EM.add_timer(3) do
-	    EM.start_server(
-	      "1.34.62.107",
-	      "9990",
-	      Server,
-	      chat_id, Rype
-	    )
-	  end
-	end
+      	Daemons.daemonize(
+      	  :app_name => 'skybot_server',
+      	  :dir_mode => :normal,
+      	  :log_dir => File.join(ROOT_DIR, 'log'),
+      	  :log_output => true,
+      	  :dir => File.join('/', 'tmp')
+      	)
+      	Rype.attach('skybot')
+      	Signal.trap('TERM') { EM.stop }
+      	puts "Start server"
+      	EM.run do
+      	  EM.add_timer(3) do
+      	    EM.start_server(
+      	      Skybot.config.server.ip,
+      	      Skybot.config.server.port,
+      	      Server,
+      	      chat_id, Rype
+      	    )
+      	  end
+      	end
       end
     end
 
@@ -109,10 +119,10 @@ module Skybot
       puts "Stopping skybot"
       pid_file = File.join('/', 'tmp', 'skybot.pid')
       if File.exist?(pid_file)
-	pid = File.read(pid_file).to_i
-	Process.kill('TERM', pid)
+      	pid = File.read(pid_file).to_i
+      	Process.kill('TERM', pid)
       else
-	puts "no skybot running"
+        puts "no skybot running"
       end
     end
 
@@ -156,6 +166,20 @@ module Skybot
         CGI.unescape_html Nokogiri::HTML(open(url), nil, "UTF-8").at("title").text.gsub(/\s+/, ' ').force_encoding('UTF-8')
       rescue
         "no title found"
+      end
+
+      def to_ostruct(obj)
+        result = obj
+        if result.is_a? Hash
+          result = result.dup
+          result.each do |key, val|
+            result[key] = to_ostruct(val)
+          end
+          result = OpenStruct.new result
+        elsif result.is_a? Array
+          result = result.map { |r| to_ostruct(r) }
+        end
+        return result
       end
   end
 
