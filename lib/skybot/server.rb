@@ -1,13 +1,12 @@
-require 'rype'
 require "cgi"
 require "yajl"
 
 class Server < EM::Connection
   include EM::HttpServer
 
-  def initialize(chat_id, rype)
+  def initialize(chat_id, skype)
     @chat_id = chat_id
-    @rype = rype
+    @skype = skype
   end
 
   def post_init
@@ -17,16 +16,16 @@ class Server < EM::Connection
 
   def process_http_request
     if @http_request_method == "POST"
-        hash = Yajl::Parser.parse(URI.unescape(@http_post_content[8..-1]))
-        Rype::Logger.info(hash.inspect)
-	hash['commits'].each do |c|
-	  file_modification = "mod #{c['modified'].count} del #{c['removed'].count} add #{c['added'].count}"
-	  msg = "%s -> %s / %s" % [
-	    c['committer']['name'],
-	    CGI::unescape(c['message']),
-	    file_modification
-	  ]
-	@rype.chat(@chat_id).send_message(msg)
+      hash = Yajl::Parser.parse(URI.unescape(@http_post_content[8..-1]))
+      Skybot::Logger.info(hash.inspect)
+    	hash['commits'].each do |c|
+    	  file_modification = "mod #{c['modified'].count} del #{c['removed'].count} add #{c['added'].count}"
+    	  msg = "%s -> %s / %s" % [
+    	    c['committer']['name'],
+    	    CGI::unescape(c['message']),
+    	    file_modification
+    	  ]
+        @skype.Invoke("CHATMESSAGE #{@chat_id} #{msg}")
       end
     end
 
@@ -34,7 +33,7 @@ class Server < EM::Connection
     response.status = 200
     response.send_response
   rescue Exception => e
-    Rype::Logger.error e
+    Skybot::Logger.error e
   end
 
   private

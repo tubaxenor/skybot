@@ -68,35 +68,6 @@ module Skybot
         end
       end  
       bot.run
-      # Rype.on(:chatmessage_received) do |chatmessage|
-      #   chatmessage.from do |from|
-      #     chatmessage.from_name do |from_name|
-      #       chatmessage.body do |body|
-      #         chatmessage.chat do |chat|
-      #           chat.members do |members|
-      #             is_private = members.length == 2
-      #             to, text   = parse_body(body)
-      #             Rype::Logger.info "chat name: #{chat.chatname}"
-      #             Rype::Logger.info "from: #{from_name}"
-      #             Rype::Logger.info "private chat: #{is_private}"
-      #             Rype::Logger.info "body: #{body}"
-      #             if body =~ /^(hi|hello|morning|evening|heyo)$/
-      #               chat.send_message("Greetings, #{from_name}") #if from_name == "Wei-fong Chang"
-      #             elsif body =~ /(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i
-      #               url = body.scan(/(https?\:[\w\.\~\-\/\?\&\+\=\:\@\%\;\#\%]+)/i).first
-      #               msg = url_parse(url[0])
-      #               chat.send_message("#{from_name}'s url [ #{msg} ]")
-      #             elsif body =~ /^\.u (.*)$/
-      #               query = /\.u (.*)$/.match(body)[1]
-      #               msg = urban_query(query)
-      #               chat.send_message("\"#{msg}\"")
-      #             end
-      #           end
-      #         end
-      #       end
-      #     end
-      #   end
-      # end
     end
 
     desc "server [CHAT_ID]", "start post server"
@@ -122,7 +93,7 @@ module Skybot
       	  :log_output => true,
       	  :dir => File.join('/', 'tmp')
       	)
-      	Rype.attach('skybot')
+      	bot = Skybot::Bot.new("skybot")
       	Signal.trap('TERM') { EM.stop }
       	puts "Start server"
       	EM.run do
@@ -131,7 +102,7 @@ module Skybot
       	      Skybot.config.server.ip,
       	      Skybot.config.server.port,
       	      Server,
-      	      chat_id, Rype
+      	      chat_id, bot.skype
       	    )
       	  end
       	end
@@ -159,13 +130,13 @@ module Skybot
 
     desc "list", "list chatroom"
     def list
-      Rype::Logger.set(Logger.new(File.join(ROOT_DIR, 'skybot.log')))
-      Rype.attach("skybot")
-      Rype.chats do |chats|
-        chats.each do |chat|
-          p chat.chatname
-        end
-      end
+
+      # bot
+      # Rype.chats do |chats|
+      #   chats.each do |chat|
+      #     p chat.chatname
+      #   end
+      # end
     end
 
     private
