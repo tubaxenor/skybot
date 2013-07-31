@@ -4,7 +4,6 @@ require 'bundler/setup'
 require 'eventmachine'
 require 'evma_httpserver'
 require 'dbus'
-require 'rype'
 require 'open-uri'
 require 'nokogiri'
 require 'cgi'
@@ -12,7 +11,6 @@ require 'thor'
 require 'lib/skybot/logger'
 require 'lib/skybot/bot'
 require 'lib/skybot/server'
-require 'lib/skybot/events'
 require "daemons"
 require 'ostruct'
 
@@ -66,7 +64,7 @@ module Skybot
           Skybot::Logger.info msg
           bot.skype.Invoke("CHATMESSAGE #{chatname} \"#{msg}\"")
         end
-      end  
+      end
       bot.run
     end
 
@@ -85,8 +83,8 @@ module Skybot
       	  puts "no skybot server running"
       	end
       else
-        puts "Starting skybot server on #{Daemon}"
-      	chat_id.daemonize(
+        puts "Starting skybot server on #{chat_id}"
+      	Daemons.daemonize(
       	  :app_name => 'skybot_server',
       	  :dir_mode => :normal,
       	  :log_dir => File.join(ROOT_DIR, 'log'),
