@@ -1,3 +1,6 @@
+### v0.0.2
+* remove rype dependency
+* more structure lib, prepare for making a gem
 ### v0.0.1
 * make skybot executable
 * add listener to listening webhooks
