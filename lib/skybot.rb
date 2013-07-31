@@ -4,19 +4,32 @@ require 'bundler/setup'
 require 'eventmachine'
 require 'evma_httpserver'
 require 'dbus'
-require 'rype'
 require 'open-uri'
 require 'nokogiri'
 require 'cgi'
+require 'yaml'
 require 'thor'
 require 'lib/skybot/logger'
 require 'lib/skybot/bot'
 require 'lib/skybot/server'
-require 'lib/skybot/events'
 require "daemons"
 require 'ostruct'
 
 module Skybot
+
+  def self.to_ostruct(obj)
+    result = obj
+    if result.is_a? Hash
+      result = result.dup
+      result.each do |key, val|
+        result[key] = to_ostruct(val)
+      end
+      result = OpenStruct.new result
+    elsif result.is_a? Array
+      result = result.map { |r| to_ostruct(r) }
+    end
+    return result
+  end
 
   def self.config
     if File.exist? File.join(ROOT_DIR, 'config/config.yml')
@@ -66,7 +79,7 @@ module Skybot
           Skybot::Logger.info msg
           bot.skype.Invoke("CHATMESSAGE #{chatname} \"#{msg}\"")
         end
-      end  
+      end
       bot.run
     end
 
@@ -85,8 +98,8 @@ module Skybot
       	  puts "no skybot server running"
       	end
       else
-        puts "Starting skybot server on #{Daemon}"
-      	chat_id.daemonize(
+        puts "Starting skybot server on #{chat_id}"
+      	Daemons.daemonize(
       	  :app_name => 'skybot_server',
       	  :dir_mode => :normal,
       	  :log_dir => File.join(ROOT_DIR, 'log'),
@@ -163,19 +176,6 @@ module Skybot
         "no title found"
       end
 
-      def to_ostruct(obj)
-        result = obj
-        if result.is_a? Hash
-          result = result.dup
-          result.each do |key, val|
-            result[key] = to_ostruct(val)
-          end
-          result = OpenStruct.new result
-        elsif result.is_a? Array
-          result = result.map { |r| to_ostruct(r) }
-        end
-        return result
-      end
   end
 
 end
