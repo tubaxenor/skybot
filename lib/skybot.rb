@@ -7,6 +7,7 @@ require 'dbus'
 require 'open-uri'
 require 'nokogiri'
 require 'cgi'
+require 'yaml'
 require 'thor'
 require 'lib/skybot/logger'
 require 'lib/skybot/bot'
@@ -15,6 +16,20 @@ require "daemons"
 require 'ostruct'
 
 module Skybot
+
+  def self.to_ostruct(obj)
+    result = obj
+    if result.is_a? Hash
+      result = result.dup
+      result.each do |key, val|
+        result[key] = to_ostruct(val)
+      end
+      result = OpenStruct.new result
+    elsif result.is_a? Array
+      result = result.map { |r| to_ostruct(r) }
+    end
+    return result
+  end
 
   def self.config
     if File.exist? File.join(ROOT_DIR, 'config/config.yml')
@@ -161,19 +176,6 @@ module Skybot
         "no title found"
       end
 
-      def to_ostruct(obj)
-        result = obj
-        if result.is_a? Hash
-          result = result.dup
-          result.each do |key, val|
-            result[key] = to_ostruct(val)
-          end
-          result = OpenStruct.new result
-        elsif result.is_a? Array
-          result = result.map { |r| to_ostruct(r) }
-        end
-        return result
-      end
   end
 
 end
