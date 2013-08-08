@@ -1,5 +1,7 @@
 #skybot
-NOTICE: This project is still under development
+NOTICE: This project is dead, because skype will no longer support desktop API ...
+
+http://gigaom.com/2013/07/13/skype-says-it-will-kill-desktop-api-by-end-of-2013/
 
 ##Installation
 
